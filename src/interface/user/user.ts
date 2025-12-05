@@ -21,12 +21,6 @@ export interface UserState {
   /** menu collapsed status */
   collapsed: boolean;
 
-  /** notification count */
-  noticeCount: number;
-
   /** user's language */
   locale: Locale;
-
-  /** Is first time to view the site ? */
-  newUser: boolean;
 }

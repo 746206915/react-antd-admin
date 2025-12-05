@@ -22,15 +22,6 @@ const mockMenuList: MenuList = [
     path: '/documentation',
   },
   {
-    code: 'guide',
-    label: {
-      zh_CN: '引导',
-      en_US: 'Guide',
-    },
-    icon: 'guide',
-    path: '/guide',
-  },
-  {
     code: 'permission',
     label: {
       zh_CN: '权限',

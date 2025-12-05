@@ -19,7 +19,6 @@ import { setGlobalState } from '@/stores/global.store';
 import { setUserItem } from '@/stores/user.store';
 
 import { logoutAsync } from '../../stores/user.action';
-import HeaderNoticeComponent from './notice';
 
 const { Header } = Layout;
 
@@ -97,7 +96,6 @@ const HeaderComponent: FC<HeaderProps> = ({ collapsed, toggle }) => {
               })}
             </span>
           </Tooltip>
-          <HeaderNoticeComponent />
           <Dropdown
             menu={{
               onClick: info => selectLocale(info),

@@ -7,8 +7,6 @@ import { useLocation,  } from 'react-router-dom';
 
 import { addTag, removeTag, setActiveTag } from '@/stores/tags-view.store';
 
-import TagsViewAction from './tagViewAction';
-
 const TagsView: FC = () => {
   const { tags, activeTagId } = useSelector(state => state.tagsView);
   const { menuList, locale } = useSelector(state => state.user);
@@ -70,7 +68,6 @@ const TagsView: FC = () => {
         type="editable-card"
         hideAdd
         onEdit={(targetKey, action) => action === 'remove' && onClose(targetKey as string)}
-        tabBarExtraContent={<TagsViewAction />}
         items={tags.map(tag => {
           return {
             key: tag.path,

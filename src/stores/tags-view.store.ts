@@ -54,20 +54,9 @@ const tagsViewSlice = createSlice({
 
       history.push(state.activeTagId)
     },
-    removeAllTag(state) {
-      state.activeTagId = state.tags[0].path;
-      state.tags = [state.tags[0]];
-      history.push(state.activeTagId)
-    },
-    removeOtherTag(state) {
-      const activeTag = state.tags.find(tag => tag.path === state.activeTagId);
-      const activeIsDashboard = activeTag!.path === state.tags[0].path;
-
-      state.tags = activeIsDashboard ? [state.tags[0]] : [state.tags[0], activeTag!];
-    },
   },
 });
 
-export const { setActiveTag, addTag, removeTag, removeAllTag, removeOtherTag } = tagsViewSlice.actions;
+export const { setActiveTag, addTag, removeTag } = tagsViewSlice.actions;
 
 export default tagsViewSlice.reducer;
