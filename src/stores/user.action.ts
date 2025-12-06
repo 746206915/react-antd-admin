@@ -33,13 +33,13 @@ export const logoutAsync = () => {
   return async (dispatch: Dispatch) => {
     const res = await apiLogout();
 
-    if (res.success){
-      localStorage.clear();
+    localStorage.clear();
       dispatch(
         setUserItem({
           logged: false,
         }),
       );
+    if (res.success){
       return true;
     }
     return false;

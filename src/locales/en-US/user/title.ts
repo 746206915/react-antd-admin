@@ -5,5 +5,6 @@ export const enUS_title = {
   'title.permission.button': 'Button Permission',
   'title.permission.config': 'Permission Config',
   'title.account': 'Account Center',
+  'title.apps': 'App List',
   'title.notFount': '404',
 };

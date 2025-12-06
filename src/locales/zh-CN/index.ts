@@ -1,4 +1,5 @@
 import { zhCN_account } from './account';
+import { zhCN_app } from './app';
 import { zhCN_component } from './component';
 import { zhCN_dashboard } from './dashboard';
 import { zhCN_globalTips } from './global/tips';
@@ -8,6 +9,7 @@ import { zhCN_title } from './user/title';
 
 const zh_CN = {
   ...zhCN_account,
+  ...zhCN_app,
   ...zhCN_avatorDropMenu,
   ...zhCN_title,
   ...zhCN_globalTips,
