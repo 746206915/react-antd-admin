@@ -36,6 +36,42 @@ const sssssMenuList: MenuList = [
     path: '/account'
   },
   {
+    code: 'apps',
+    label: {
+      zh_CN: '应用管理',
+      en_US: 'App Management'
+    },
+    icon: 'account', // 确保CustomIcon中有此图标
+    path: '/apps'
+  },
+  {
+    code: 'admins',
+    label: {
+      zh_CN: '代理管理',
+      en_US: 'admins Management',
+    },
+    icon: 'permission',
+    path: '/admins',
+    children: [
+      {
+        code: 'adminslist',
+        label: {
+          zh_CN: '代理列表',
+          en_US: 'Admin List',
+        },
+        path: '/admins/list',
+      },
+      {
+        code: 'adminspermission',
+        label: {
+          zh_CN: '代理权限',
+          en_US: 'Admin Permission',
+        },
+        path: '/admins/permission',
+      },
+    ],
+  },
+  {
     code: 'permission',
     label: {
       zh_CN: '权限',
