@@ -15,3 +15,4 @@ declare interface ObjectConstructor {
 declare global {
   export type YN = 'Y' | 'N';
 }
+

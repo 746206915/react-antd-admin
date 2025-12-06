@@ -12,12 +12,6 @@ import { formatSearch } from '@/utils/formatSearch';
 
 import { loginAsync } from '../../stores/user.action';
 
-const initialValues: LoginParams = {
-  username: 'guest',
-  password: 'guest',
-  // remember: true
-};
-
 const LoginForm: FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -38,7 +32,7 @@ const LoginForm: FC = () => {
 
   return (
     <div className="login-page" style={{ backgroundColor: token.colorBgContainer }}>
-      <Form<LoginParams> onFinish={onFinished} className="login-page-form" initialValues={initialValues}>
+      <Form<LoginParams> onFinish={onFinished} className="login-page-form">
         <h2>REACT ANTD ADMIN</h2>
         <Form.Item
           name="username"

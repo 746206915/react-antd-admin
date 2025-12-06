@@ -10,7 +10,7 @@ const initialState: UserState = {
   ...getGlobalState(),
   // 余额: 666,
   locale: (localStorage.getItem('locale')! || 'en_US') as Locale,
-  logged: localStorage.getItem('t') ? true : false,
+  logged: false,
   menuList: [],
   username: localStorage.getItem('username') || '',
   role: (localStorage.getItem('username') || '') as Role,
