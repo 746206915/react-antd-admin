@@ -1,7 +1,6 @@
 import { zhCN_account } from './account';
 import { zhCN_component } from './component';
 import { zhCN_dashboard } from './dashboard';
-import { zhCN_documentation } from './documentation';
 import { zhCN_globalTips } from './global/tips';
 import { zhCN_permissionRole } from './permission/role';
 import { zhCN_avatorDropMenu } from './user/avatorDropMenu';
@@ -14,7 +13,6 @@ const zh_CN = {
   ...zhCN_globalTips,
   ...zhCN_permissionRole,
   ...zhCN_dashboard,
-  ...zhCN_documentation,
   ...zhCN_component,
 };
 

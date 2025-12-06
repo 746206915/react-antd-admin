@@ -13,7 +13,6 @@ import PersonalCenterPage from '@/pages/account';
 import WrapperRouteComponent from './config';
 
 const NotFound = lazy(() => import(/* webpackChunkName: "404'"*/ '@/pages/404'));
-const Documentation = lazy(() => import(/* webpackChunkName: "404'"*/ '@/pages/doucumentation'));
 const RoutePermission = lazy(() => import(/* webpackChunkName: "route-permission"*/ '@/pages/permission/route'));
 const FormPage = lazy(() => import(/* webpackChunkName: "form'"*/ '@/pages/components/form'));
 const TablePage = lazy(() => import(/* webpackChunkName: "table'"*/ '@/pages/components/table'));
@@ -49,10 +48,6 @@ const routeList: RouteObject[] = [
       {
         path: 'account',
         element: <WrapperRouteComponent element={<PersonalCenterPage />} titleId="title.personalCenter" />,
-      },
-      {
-        path: 'documentation',
-        element: <WrapperRouteComponent element={<Documentation />} titleId="title.documentation" />,
       },
       {
         path: 'permission/route',
