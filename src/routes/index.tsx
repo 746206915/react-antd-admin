@@ -28,6 +28,9 @@ const BusinessWithRadioCardsPage = lazy(
 );
 const BusinessWithTabsPage = lazy(() => import(/* webpackChunkName: "with-tabs" */ '@/pages/business/with-tabs'));
 
+const AppsListPage = lazy(() => import(/* webpackChunkName: "apps-list" */ '@/pages/apps'));
+const AppManagementPage = lazy(() => import(/* webpackChunkName: "app-management" */ '@/pages/apps/management'));
+
 const routeList: RouteObject[] = [
   {
     path: '/login',
@@ -96,6 +99,14 @@ const routeList: RouteObject[] = [
       {
         path: 'business/with-tabs',
         element: <WrapperRouteComponent element={<BusinessWithTabsPage />} titleId="title.account" />,
+      },
+      {
+        path: 'apps',
+        element: <WrapperRouteComponent element={<AppsListPage />} titleId="title.apps" />,
+      },
+      {
+        path: 'apps/:appId/management',
+        element: <WrapperRouteComponent element={<AppManagementPage />} titleId="title.app.management" />,
       },
       {
         path: '*',
