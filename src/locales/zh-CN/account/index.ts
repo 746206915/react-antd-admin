@@ -52,4 +52,5 @@ export const zhCN_account = {
   'app.settings.notification.todo-description': '待办任务将以站内信的形式通知',
   'app.settings.open': '开',
   'app.settings.close': '关',
+  'app.personal.center.description': '这里是您的个人中心，您可以管理个人信息和账户设置',
 };

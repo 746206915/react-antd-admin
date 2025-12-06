@@ -5,6 +5,6 @@ export const zhCN_title = {
   'title.permission.route': '路由权限',
   'title.permission.button': '按钮权限',
   'title.permission.config': '权限配置',
-  'title.account': '个人设置',
+  'title.account': '个人中心',
   'title.notFount': '404',
 };

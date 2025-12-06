@@ -128,7 +128,7 @@ const HeaderComponent: FC<HeaderProps> = ({ collapsed, toggle }) => {
                     key: '1',
                     icon: <UserOutlined />,
                     label: (
-                      <span onClick={() => navigate('/dashboard')}>
+                      <span onClick={() => navigate('/account')}>
                         <LocaleFormatter id="header.avator.account" />
                       </span>
                     ),

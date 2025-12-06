@@ -13,6 +13,15 @@ const mockMenuList: MenuList = [
     path: '/dashboard',
   },
   {
+    code: 'account',
+    label: {
+      zh_CN: '个人中心',
+      en_US: 'Personal Center'
+    },
+    icon: 'account', // 确保CustomIcon中有此图标
+    path: '/account'
+  },
+  {
     code: 'documentation',
     label: {
       zh_CN: '文档',

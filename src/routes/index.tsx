@@ -8,6 +8,7 @@ import { useRoutes } from 'react-router-dom';
 import Dashboard from '@/pages/dashboard';
 import LayoutPage from '@/pages/layout';
 import LoginPage from '@/pages/login';
+import PersonalCenterPage from '@/pages/account';
 
 import WrapperRouteComponent from './config';
 
@@ -44,6 +45,10 @@ const routeList: RouteObject[] = [
       {
         path: 'dashboard',
         element: <WrapperRouteComponent element={<Dashboard />} titleId="title.dashboard" />,
+      },
+      {
+        path: 'account',
+        element: <WrapperRouteComponent element={<PersonalCenterPage />} titleId="title.personalCenter" />,
       },
       {
         path: 'documentation',
