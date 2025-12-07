@@ -7,3 +7,21 @@ export interface AppItem {
 }
 
 export type AppList = AppItem[];
+
+
+export interface AppInfo {
+  ID: number;
+  Name: string;
+  Description: string;
+  Notice: string;
+  Status: string;
+  RsaKey: string;
+  Config: string;
+}
+
+export type SetAppInfoParams = {
+  ID: number;
+  Description: string;
+  Notice: string;
+  Status: string;
+}
