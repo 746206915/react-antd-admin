@@ -5,7 +5,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Card, Tabs, Form, message, Input, Space, Button, Select, Popconfirm, Upload } from 'antd'; // 从antd导入Breadcrumb
 import { SaveOutlined, ArrowLeftOutlined, UploadOutlined, ReloadOutlined, EditOutlined } from '@ant-design/icons';
 import { AppInfo, SetAppInfoParams } from '@/interface/app.interface';
-import { GenerateAppRSAKeys, getAppInfo, setAppInfo, SetAppConfig } from '@/api/app.api'; // 导入API
+import { GenerateAppRSAKeys, getAppInfo, setAppInfo, SetAppConfig, DelApp } from '@/api/app.api'; // 导入API
 import type { UploadFile } from 'antd/es/upload/interface';
 
 const appStatusOptions = [
@@ -44,6 +44,22 @@ const AppSettings: FC<{
     } catch (error) {
       message.error('表单验证失败，请检查必填项');
       console.error(error);
+    }
+  };
+
+  const handleDelApp = async () => {
+    try {
+      const res = await DelApp({ id: data.ID });
+      if(res.success){
+        message.success('删除成功！');
+      }else{
+        message.warning('删除失败！');
+      }
+      navigate('/apps')
+    } catch (error) {
+      message.error('删除错误');
+      console.error(error);
+      navigate('/apps')
     }
   };
 
@@ -99,6 +115,16 @@ const AppSettings: FC<{
             >
               返回列表
             </Button>
+            <Popconfirm
+            title="确定删除吗?"
+            onConfirm={handleDelApp}
+            okText="确定"
+            cancelText="取消"
+          >
+            <Button danger>
+              删除应用
+            </Button>
+          </Popconfirm>
           </Space>
         </Form.Item>
       </Form>
@@ -168,7 +194,7 @@ const AppRsaKeyview: FC<{
             okText="确定"
             cancelText="取消"
           >
-            <Button type="default" size="large" danger>
+            <Button danger>
               重新生成密钥
             </Button>
           </Popconfirm>

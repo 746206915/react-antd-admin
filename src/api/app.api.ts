@@ -29,6 +29,10 @@ export const GenerateAppRSAKeys = (data: { id: number }) => {
   return request('post', '/api/app/setkeys', data);
 };
 
+export const DelApp = (data: { id: number }) => {
+  return request('post', '/api/app/del', data);
+};
+
 export const SetAppConfig = (data: { id: number, config: string }) => {
   return request('post', '/api/app/setconfig', data);
 };
