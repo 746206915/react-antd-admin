@@ -22,9 +22,13 @@ export const getAppInfo = (data: { id: number }) => {
 };
 
 export const setAppInfo = (data: SetAppInfoParams) => {
-  return request<AppInfo>('post', '/api/app/set', data);
+  return request('post', '/api/app/set', data);
 };
 
 export const GenerateAppRSAKeys = (data: { id: number }) => {
-  return request<AppInfo>('post', '/api/app/setkeys', data);
+  return request('post', '/api/app/setkeys', data);
+};
+
+export const SetAppConfig = (data: { id: number, config: string }) => {
+  return request('post', '/api/app/setconfig', data);
 };

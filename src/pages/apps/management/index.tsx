@@ -1,13 +1,12 @@
 // src/pages/apps/management/index.tsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { FC } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, Tabs, Form, message, Input, Space, Button, Select, Popconfirm } from 'antd'; // 从antd导入Breadcrumb
-import { SaveOutlined, ArrowLeftOutlined } from '@ant-design/icons';
+import { Card, Tabs, Form, message, Input, Space, Button, Select, Popconfirm, Upload } from 'antd'; // 从antd导入Breadcrumb
+import { SaveOutlined, ArrowLeftOutlined, UploadOutlined, ReloadOutlined, EditOutlined } from '@ant-design/icons';
 import { AppInfo, SetAppInfoParams } from '@/interface/app.interface';
-import { GenerateAppRSAKeys, getAppInfo, setAppInfo } from '@/api/app.api'; // 导入API
-import { log } from 'console';
-
+import { GenerateAppRSAKeys, getAppInfo, setAppInfo, SetAppConfig } from '@/api/app.api'; // 导入API
+import type { UploadFile } from 'antd/es/upload/interface';
 
 const appStatusOptions = [
   { label: '正常', value: 'Normal' },
@@ -187,16 +186,145 @@ const AppRsaKeyview: FC<{
 };
 
 // 应用数据子页面
-const AppOverview: FC<{ data: AppInfo }> = ({ data }) => {
-  // 格式化配置数据（JSON字符串转对象，便于展示）
-  const getFormattedConfig = () => {
+const AppConfigview: FC<{ data: AppInfo }> = ({ data }) => {
+  const navigate = useNavigate();
+  // 初始化加载已有配置
+  const [jsonText, setJsonText] = useState(data.Config || '');
+  const [loading, setLoading] = useState(false);
+  // 原生文件选择器DOM引用
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // JSON格式化/校验工具函数
+  const formatJSON = (str: string) => {
+    if (!str) return '';
     try {
-      return JSON.stringify(JSON.parse(data.Config || '{}'), null, 2);
-    } catch {
-      return data.Config || '配置格式异常';
+      return JSON.stringify(JSON.parse(str), null, 2);
+    } catch (error) {
+      message.error('JSON 格式错误，请检查');
+      return str;
     }
   };
-  return <div>应用 {data.Name} 的数据统计</div>;
+
+  // 点击按钮触发文件选择器
+  const handleClickSelectFile = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click(); // 触发原生文件选择框
+    }
+  };
+
+  // 处理文件选择后的读取逻辑
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // 校验文件类型（仅允许JSON）
+    if (file.type !== 'application/json' && !file.name.endsWith('.json')) {
+      message.error('仅支持上传 .json 格式文件！');
+      e.target.value = ''; // 清空选择，避免重复选同一文件不触发change
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // 读取文件文本内容（原生File API）
+      const text = await file.text();
+      if (!text) {
+        message.warning('文件内容为空');
+        return;
+      }
+      // 格式化并展示JSON
+      setJsonText(formatJSON(text));
+      message.success(`成功读取文件：${file.name}`);
+    } catch (error) {
+      message.error('文件解析失败：' + (error as Error).message);
+    } finally {
+      setLoading(false);
+      e.target.value = ''; // 清空选择，允许重复选同一文件
+    }
+  };
+
+  // 格式化JSON
+  const handleFormatJSON = () => {
+    setJsonText(formatJSON(jsonText));
+  };
+
+  // 保存JSON配置
+  const handleSaveJSON = async() => {
+    if (!jsonText) {
+      message.warning('暂无JSON内容可保存');
+      return;
+    }
+    // 替换为你的保存接口调用
+    const res = await SetAppConfig({ id: data.ID, config: jsonText });
+    if(res.success){
+      message.success('JSON配置保存成功！');
+    }else{
+      message.success('JSON配置保存失败:' + res.message);
+    }
+    
+  };
+
+  return (
+    <div style={{ padding: '8px 0' }}>
+      {/* 隐藏的原生文件选择器 */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".json" // 仅允许选择JSON文件
+        onChange={handleFileChange}
+        style={{ display: 'none' }} // 隐藏原生选择框
+      />
+
+      {/* JSON编辑区域 */}
+      <Input.TextArea
+        value={jsonText}
+        onChange={(e) => setJsonText(e.target.value)}
+        rows={20}
+        placeholder="上传JSON文件或手动输入配置..."
+        style={{
+          marginBottom: '16px',
+        }}
+      />
+
+      {/* 操作按钮组 */}
+      <Space size="middle" wrap>
+        {/* 选择文件按钮（触发原生选择器） */}
+        <Button
+          icon={<UploadOutlined />}
+          type="primary"
+          onClick={handleClickSelectFile}
+          loading={loading}
+        >
+          选择JSON文件
+        </Button>
+
+        {/* 格式化按钮 */}
+        <Button
+          icon={<ReloadOutlined />}
+          onClick={handleFormatJSON}
+          disabled={!jsonText || loading}
+        >
+          格式化JSON
+        </Button>
+
+        {/* 保存按钮 */}
+        <Button
+          icon={<EditOutlined />}
+          onClick={handleSaveJSON}
+          disabled={!jsonText || loading}
+        >
+          保存JSON配置
+        </Button>
+
+        <Button 
+              icon={<ArrowLeftOutlined />} 
+              onClick={() => navigate('/apps')}
+            >
+              返回列表
+            </Button>
+      </Space>
+    </div>
+  );
 };
 
 
@@ -273,6 +401,11 @@ const AppManagementPage: FC = () => {
           <Tabs.TabPane tab="密钥设置" key="rsakeysettings">
             <AppRsaKeyview data={appData} onRefresh={fetchAppDetail} />
           </Tabs.TabPane>
+
+          <Tabs.TabPane tab="参数设置" key="configsettings">
+            <AppConfigview data={appData}/>
+          </Tabs.TabPane>
+          
         </Tabs>
       </Card>
     </div>
