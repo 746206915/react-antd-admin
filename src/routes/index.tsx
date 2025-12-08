@@ -30,6 +30,7 @@ const BusinessWithTabsPage = lazy(() => import(/* webpackChunkName: "with-tabs" 
 
 const AppsListPage = lazy(() => import(/* webpackChunkName: "apps-list" */ '@/pages/apps'));
 const AppManagementPage = lazy(() => import(/* webpackChunkName: "app-management" */ '@/pages/apps/management'));
+const AppUsersPage = lazy(() => import(/* webpackChunkName: "app-users" */ '@/pages/apps/users'));
 
 const routeList: RouteObject[] = [
   {
@@ -107,6 +108,10 @@ const routeList: RouteObject[] = [
       {
         path: 'apps/:appId/management',
         element: <WrapperRouteComponent element={<AppManagementPage />} titleId="title.app.management" />,
+      },
+      {
+        path: 'apps/:appId/users',
+        element: <WrapperRouteComponent element={<AppUsersPage />} titleId="title.app.users" />,
       },
       {
         path: '*',

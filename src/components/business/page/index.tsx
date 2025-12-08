@@ -88,9 +88,9 @@ const BasePage = <S extends SearchApi>(props: PageProps<S>, ref: React.Ref<RefPa
           [asideKey!]: asideCheckedKey,
         };
         const res = await pageApi(obj);
-
-        if (res.status) {
-          setPageData({ total: res.result.total, data: res.result.data });
+        
+        if (res.success) {
+          setPageData({ total: res.result?.total, data: res.result?.data });
         }
       }
     },

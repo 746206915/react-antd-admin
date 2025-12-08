@@ -57,6 +57,10 @@ const AppsListPage: FC = () => {
     navigate(`/apps/${appId}/management`);
   };
 
+  const handleEnterAppUsers = (appId: string) => {
+    navigate(`/apps/${appId}/users`);
+  };
+
   // 打开新建应用模态框
   const handleOpenModal = () => {
     setModalVisible(true);
@@ -146,7 +150,7 @@ const AppsListPage: FC = () => {
                     <Button 
                       type="text" 
                       icon={<SettingOutlined />}
-                      onClick={() => handleEnterApp(item.ID)}
+                      onClick={() => handleEnterAppUsers(item.ID)}
                     >
                       用户列表
                     </Button>
