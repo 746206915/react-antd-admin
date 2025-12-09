@@ -1,5 +1,6 @@
 import type { AppItem, AppList, AppInfo, SetAppInfoParams } from '@/interface/app.interface';
 import { request } from './request';
+import { AppUserList } from '@/interface/appuser.interface';
 
 /**
  * 获取 app 列表
@@ -35,4 +36,10 @@ export const DelApp = (data: { id: number }) => {
 
 export const SetAppConfig = (data: { id: number, config: string }) => {
   return request('post', '/api/app/setconfig', data);
+};
+
+import type { PageData } from '@/interface';
+
+export const GetAppUserList = (data: { id: number}) => {
+  return request<AppUserList[]>('post', '/api/user/getlist', data);
 };
