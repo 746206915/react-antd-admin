@@ -12,3 +12,7 @@ export const apiLogin = (params: LoginParams) => {
 export const apiLogout = () => request('post', '/api/admin/logout');
 
 
+
+export const AddAppUser = (data: { appid: number, usertype: string, userkey: string, time_interval: number }) => {
+  return request('post', '/api/user/add', data);
+};

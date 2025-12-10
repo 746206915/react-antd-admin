@@ -10,13 +10,16 @@ import type { TableRowSelection } from 'antd/es/table/interface';
 import MyButton from '@/components/basic/button';
 import type { AppUserList } from '@/interface/appuser.interface';
 import { GetAppUserList } from '@/api/app.api';
-
+import AddAppUserModal from '@/pages/components/app/AddAppUserModal';
+import { AddAppUser } from '@/api/user.api'
 type UserStatus = 'InActive' | 'Active' | 'Freeze';
 
 const UserListPage: FC = () => {
   const { appId } = useParams();
   
   // 状态管理
+  const [modalVisible, setModalVisible] = useState(false); //模态框
+  const [isAdding, setIsAdding] = useState(false); // 创建应用状态
   const [loading, setLoading] = useState<boolean>(false); // 加载状态
   const [allData, setAllData] = useState<AppUserList[]>([]); // 缓存全量数据
   const [searchParams, setSearchParams] = useState({ // 搜索参数
@@ -137,6 +140,47 @@ const UserListPage: FC = () => {
     }
   };
 
+  // 打开新增用户模态框
+    const handleOpenModal = () => {
+      setModalVisible(true);
+    };
+  
+    // 关闭新增用户模态框
+    const handleCloseModal = () => {
+      setModalVisible(false);
+    };
+  
+    // 提交新增用户表单
+    const handleSubmitAddAppUser = async (values: { 
+      userkey: string,
+      usertype: string,
+      days: number,
+      hours: number,
+     }) => {
+      const time_interval = values.days * 86400 + values.hours * 3600;
+      if(time_interval === 0){
+        message.error("时间不能为0");
+        return;
+      }
+      try {
+        setIsAdding(true);
+        await AddAppUser({ 
+          appid: Number(appId),
+          userkey: values.userkey,
+          usertype: values.usertype,
+          time_interval: time_interval,
+         });
+        message.success("添加成功");
+        handleCloseModal();
+        fetchAllData(); // 重新获取列表数据
+      } catch (error) {
+        message.error("添加失败");
+        console.error('Failed to add appuser:', error);
+      } finally {
+        setIsAdding(false);
+      }
+    };
+
   // 表格列配置
   const tableColumns = [
     { title: 'ID', dataIndex: 'ID', key: 'ID' },
@@ -224,7 +268,7 @@ const UserListPage: FC = () => {
                 批量加时 ({selectedRowKeys.length})
               </Button>
               <Button 
-                // onClick={handleClearSelection}
+                onClick={handleOpenModal}
               >
                 新增
               </Button>
@@ -257,6 +301,13 @@ const UserListPage: FC = () => {
           />
         </div>
       </Card>
+      {/* 添加用户模态框 */}
+      <AddAppUserModal
+        visible={modalVisible}
+        onCancel={handleCloseModal}
+        onSubmit={handleSubmitAddAppUser}
+        loading={isAdding}
+      />
     </div>
   );
 };

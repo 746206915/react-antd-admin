@@ -38,8 +38,6 @@ export const SetAppConfig = (data: { id: number, config: string }) => {
   return request('post', '/api/app/setconfig', data);
 };
 
-import type { PageData } from '@/interface';
-
 export const GetAppUserList = (data: { id: number}) => {
   return request<AppUserList[]>('post', '/api/user/getlist', data);
 };
