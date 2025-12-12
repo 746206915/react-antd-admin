@@ -16,3 +16,6 @@ export const apiLogout = () => request('post', '/api/admin/logout');
 export const AddAppUser = (data: { appid: number, usertype: string, userkey: string, time_interval: number }) => {
   return request('post', '/api/user/add', data);
 };
+export const DeleteAppUser = (data: { appid: number, userid: number }) => {
+  return request('post', '/api/user/del', data);
+};

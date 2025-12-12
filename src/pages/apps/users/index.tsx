@@ -10,14 +10,42 @@ import type { TableRowSelection } from 'antd/es/table/interface';
 import MyButton from '@/components/basic/button';
 import type { AppUserList } from '@/interface/appuser.interface';
 import { GetAppUserList } from '@/api/app.api';
-import AddAppUserModal from '@/pages/components/app/AddAppUserModal';
-import { AddAppUser } from '@/api/user.api'
+import AddAppCardKeyModal from '@/pages/components/app/AddAppCardKeyModal';
+import AddAppSerialModal from '@/pages/components/app/AddAppSerialModal';
+import { AddAppUser, DeleteAppUser } from '@/api/user.api'
+
+
+const generateRandomString = (length: number = 8): string => {
+  // 校验参数合法性
+  if (!Number.isInteger(length) || length <= 0) {
+    throw new Error('长度必须是大于0的整数');
+  }
+
+  // 字符池：0-9 + A-Z
+  const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let result = '';
+  const charsetLength = charset.length;
+
+  // 高效生成随机字符串（避免多次字符串拼接）
+  const arr = new Array(length);
+  for (let i = 0; i < length; i++) {
+    // 使用 crypto.getRandomValues 提升随机性（优于 Math.random）
+    const randomIndex = crypto.getRandomValues(new Uint32Array(1))[0] % charsetLength;
+    arr[i] = charset[randomIndex];
+  }
+
+  return arr.join('');
+};
+
 type UserStatus = 'InActive' | 'Active' | 'Freeze';
+
 
 const UserListPage: FC = () => {
   const { appId } = useParams();
   
   // 状态管理
+  // 1. 新增：模态框类型状态（区分卡密/序列号）
+  const [modalType, setModalType] = useState<'cardKey' | 'serial'>('cardKey');
   const [modalVisible, setModalVisible] = useState(false); //模态框
   const [isAdding, setIsAdding] = useState(false); // 创建应用状态
   const [loading, setLoading] = useState<boolean>(false); // 加载状态
@@ -110,9 +138,13 @@ const UserListPage: FC = () => {
   // 单行删除
   const handleDelete = async (id: number) => {
     try {
-      // await DeleteAppUser(id);
-      message.success('删除成功');
-      setAllData(prev => prev.filter(item => item.ID !== id));
+      const res = await DeleteAppUser({appid: Number(appId), userid: id});
+      if (res.success){
+        message.success('删除成功');
+        setAllData(prev => prev.filter(item => item.ID !== id));
+      }else{
+        message.warning(res.message);
+      }
       setSelectedRowKeys(prev => prev.filter(key => key !== id));
     } catch (error) {
       message.error('删除失败');
@@ -140,10 +172,11 @@ const UserListPage: FC = () => {
     }
   };
 
-  // 打开新增用户模态框
-    const handleOpenModal = () => {
-      setModalVisible(true);
-    };
+  // 2. 修改：打开模态框的方法，接收类型参数
+  const handleOpenModal = (type: 'cardKey' | 'serial') => {
+    setModalType(type); // 先设置类型
+    setModalVisible(true); // 再打开模态框
+  };
   
     // 关闭新增用户模态框
     const handleCloseModal = () => {
@@ -153,10 +186,13 @@ const UserListPage: FC = () => {
     // 提交新增用户表单
     const handleSubmitAddAppUser = async (values: { 
       userkey: string,
-      usertype: string,
+      // usertype: string,
+      len: number,
+      count: number,
       days: number,
       hours: number,
      }) => {
+      // const usertype = modalType === 'cardKey' ? 'CardKey' : 'Serial';
       const time_interval = values.days * 86400 + values.hours * 3600;
       if(time_interval === 0){
         message.error("时间不能为0");
@@ -164,12 +200,26 @@ const UserListPage: FC = () => {
       }
       try {
         setIsAdding(true);
-        await AddAppUser({ 
-          appid: Number(appId),
-          userkey: values.userkey,
-          usertype: values.usertype,
-          time_interval: time_interval,
-         });
+        if (modalType === 'cardKey') {
+          // 卡密专属逻辑
+          for (let i = 0; i < values.count; i++) {
+            const cardkey = generateRandomString(values.len);
+            await AddAppUser({
+              appid: Number(appId),
+              userkey: cardkey,
+              usertype: 'CardKey',
+              time_interval: time_interval,
+            });
+          }
+        } else {
+          // 序列号专属逻辑
+          await AddAppUser({
+            appid: Number(appId),
+            userkey: values.userkey,
+            usertype: 'Serial',
+            time_interval: time_interval,
+          });
+        }
         message.success("添加成功");
         handleCloseModal();
         fetchAllData(); // 重新获取列表数据
@@ -268,9 +318,14 @@ const UserListPage: FC = () => {
                 批量加时 ({selectedRowKeys.length})
               </Button>
               <Button 
-                onClick={handleOpenModal}
+                onClick={() => handleOpenModal('cardKey')}
               >
-                新增
+                新增卡密授权
+              </Button>
+              <Button 
+                onClick={() => handleOpenModal('serial')}
+              >
+                新增序列号授权
               </Button>
             </Space>
           </Col>
@@ -302,8 +357,14 @@ const UserListPage: FC = () => {
         </div>
       </Card>
       {/* 添加用户模态框 */}
-      <AddAppUserModal
-        visible={modalVisible}
+      <AddAppCardKeyModal
+        visible={modalVisible && modalType === 'cardKey'} // 仅卡密类型时显示
+        onCancel={handleCloseModal}
+        onSubmit={handleSubmitAddAppUser}
+        loading={isAdding}
+      />
+      <AddAppSerialModal
+        visible={modalVisible && modalType === 'serial'} // 仅序列号类型时显示
         onCancel={handleCloseModal}
         onSubmit={handleSubmitAddAppUser}
         loading={isAdding}

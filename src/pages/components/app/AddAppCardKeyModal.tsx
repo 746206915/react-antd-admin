@@ -5,7 +5,8 @@ import type { FormInstance } from 'antd/es/form';
 // 定义表单值类型
 interface CreateAppUserFormValues {
   userkey: string;
-  usertype: 'cardkey' | 'serial';
+  len: number;
+  count: number;
   days: number;
   hours: number;
 }
@@ -26,7 +27,8 @@ const CreateAppUserModal = ({ visible, onCancel, onSubmit, loading }: CreateAppU
   useEffect(() => {
     form.setFieldsValue({
       userkey: '',
-      usertype: 'cardkey',
+      len: 8,
+      count: 1,
       days: 0,
       hours: 0,
     });
@@ -71,32 +73,37 @@ const CreateAppUserModal = ({ visible, onCancel, onSubmit, loading }: CreateAppU
         layout="vertical"
         initialValues={{
           userkey: '',
-          usertype: 'cardkey',
+          len: 8,
+          count: 1,
           days: 0,
           hours: 0,
         }} // 原生initialValues，双重保障初始值
       >
-        {/* 卡密/序列号 */}
+
+        {/* 长度 */}
         <Form.Item<CreateAppUserFormValues>
-          name="userkey"
-          label="卡密/序列号"
-          rules={[{ required: true, message: '请输入卡密/序列号' }]}
+          name="len"
+          label="卡密长度"
+        //   rules={[{ min: 0, max: 365, message: '天数需在 0-365 之间' }]}
         >
-          <Input placeholder="请输入卡密/序列号" />
+          <InputNumber
+            min={8}
+            max={16}
+            placeholder="输入卡密长度"
+            style={{ width: '100%' }}
+          />
         </Form.Item>
 
-        {/* 种类选择 */}
+        {/* 数量 */}
         <Form.Item<CreateAppUserFormValues>
-          name="usertype"
-          label="种类"
-          rules={[{ required: true, message: '请选择种类' }]}
+          name="count"
+          label="生成卡密数量"
+        //   rules={[{ min: 0, max: 365, message: '天数需在 0-365 之间' }]}
         >
-          <Select
-            options={[
-              { label: '卡密', value: 'cardkey' },
-              { label: '序列号', value: 'serial' },
-            ]}
-            placeholder="请选择种类"
+          <InputNumber
+            min={1}
+            placeholder="输入卡密数量"
+            style={{ width: '100%' }}
           />
         </Form.Item>
 
