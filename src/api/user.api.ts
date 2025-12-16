@@ -19,3 +19,10 @@ export const AddAppUser = (data: { appid: number, usertype: string, userkey: str
 export const DeleteAppUser = (data: { appid: number, userid: number }) => {
   return request('post', '/api/user/del', data);
 };
+
+
+import type { AppUserInfo } from '@/interface/appuser.interface';
+
+export const GetAppUserInfo = (data: { userid: number}) => {
+  return request<AppUserInfo>('post', '/api/user/getinfo', data);
+};

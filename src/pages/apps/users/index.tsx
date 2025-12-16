@@ -1,10 +1,10 @@
 import type { FC, ChangeEvent } from 'react';
 import { useState, useEffect, useMemo } from 'react';
 import { 
-  Table, Input, Space, Button, Tag, 
+  Table, Input, Space, Button, Tag, Popconfirm,
   Card, Form, Row, Col, Pagination, message
 } from 'antd';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import type { TableRowSelection } from 'antd/es/table/interface';
 
 import MyButton from '@/components/basic/button';
@@ -42,7 +42,7 @@ type UserStatus = 'InActive' | 'Active' | 'Freeze';
 
 const UserListPage: FC = () => {
   const { appId } = useParams();
-  
+  const navigate = useNavigate();
   // 状态管理
   // 1. 新增：模态框类型状态（区分卡密/序列号）
   const [modalType, setModalType] = useState<'cardKey' | 'serial'>('cardKey');
@@ -74,6 +74,10 @@ const UserListPage: FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleEnterAppUser = (userId: number) => {
+    navigate(`/users/${userId}/management/`);
   };
 
   // 初始化拉取数据
@@ -151,26 +155,44 @@ const UserListPage: FC = () => {
     }
   };
 
-  // 批量删除
-  const handleBatchDelete = async () => {
-    if (selectedRowKeys.length === 0) {
-      message.warning('请选择要删除的记录');
-      return;
+  // 批量删除（通过循环调用单次删除接口）
+const handleBatchDelete = async () => {
+  if (selectedRowKeys.length === 0) {
+    message.warning('请选择要删除的记录');
+    return;
+  }
+
+  try {
+    setLoading(true); // 显示加载状态
+    let successCount = 0;
+    
+    // 循环调用单次删除接口
+    for (const key of selectedRowKeys) {
+      const id = Number(key); // 确保ID为数字类型
+      try {
+        const res = await DeleteAppUser({ 
+          appid: Number(appId), 
+          userid: id 
+        });
+        if (res.success) {
+          successCount++;
+          // 实时更新列表（删除成功的项）
+          setAllData(prev => prev.filter(item => item.ID !== id));
+        } else {
+          message.warning(`删除ID: ${id} 失败: ${res.message}`);
+        }
+      } catch (error) {
+        console.error(`删除ID: ${id} 出错:`, error);
+        message.error(`删除ID: ${id} 时发生错误`);
+      }
     }
 
-    try {
-      // 调用批量删除接口
-      // await BatchDeleteAppUser(selectedRowKeys);
-      message.success(`成功删除 ${selectedRowKeys.length} 条记录`);
-      
-      // 更新前端数据
-      setAllData(prev => prev.filter(item => !selectedRowKeys.includes(item.ID)));
-      setSelectedRowKeys([]); // 清空选中
-    } catch (error) {
-      message.error('批量删除失败，请重试');
-      console.error('批量删除失败：', error);
-    }
-  };
+    message.success(`批量操作完成，成功删除 ${successCount} 条，共 ${selectedRowKeys.length} 条`);
+    setSelectedRowKeys([]); // 清空选中状态
+  } finally {
+    setLoading(false); // 关闭加载状态
+  }
+};
 
   // 2. 修改：打开模态框的方法，接收类型参数
   const handleOpenModal = (type: 'cardKey' | 'serial') => {
@@ -254,6 +276,33 @@ const UserListPage: FC = () => {
       }
     },
     { 
+      title: '时间值', 
+      dataIndex: 'TimeInterval', 
+      key: 'TimeInterval',
+      render: (timestamp: number) => {
+    // 时间戳为空时返回"无"
+    if (!timestamp) return '无';
+    
+    // 定义时间单位换算（毫秒）
+    const ONE_MINUTE = 60;
+    const ONE_HOUR = 60 * ONE_MINUTE;
+    const ONE_DAY = 24 * ONE_HOUR;
+    
+    // 计算各时间单位的差值
+    const days = Math.floor(timestamp / ONE_DAY);
+    const hours = Math.floor((timestamp % ONE_DAY) / ONE_HOUR);
+    const minutes = Math.floor((timestamp % ONE_HOUR) / ONE_MINUTE);
+    
+    // 拼接结果字符串（只显示非零的单位）
+    const parts = [];
+    if (days > 0) parts.push(`${days}天`);
+    if (hours > 0) parts.push(`${hours}小时`);
+    if (minutes > 0 || parts.length === 0) parts.push(`${minutes}分`);
+    
+    return parts.join('');
+  }
+},
+    { 
       title: '到期时间', 
       dataIndex: 'Endtime', 
       key: 'Endtime',
@@ -272,6 +321,12 @@ const UserListPage: FC = () => {
             onClick={() => handleDelete(record.ID)}
           >
             删除
+          </MyButton>
+          <MyButton 
+            type="text" 
+            onClick={() => handleEnterAppUser(record.ID)}
+          >
+            管理
           </MyButton>
         </Space>
       ),
@@ -303,20 +358,27 @@ const UserListPage: FC = () => {
           {/* 批量操作按钮 */}
           <Col>
             <Space>
+              <Popconfirm
+                title="确定删除吗?"
+                onConfirm={handleBatchDelete}
+                okText="确定"
+                cancelText="取消"
+                >
               <Button 
                 danger 
-                onClick={handleBatchDelete}
+                // onClick={handleBatchDelete}
                 disabled={selectedRowKeys.length === 0}
                 icon={<></>} // 可添加删除图标
               >
-                批量删除 ({selectedRowKeys.length})
+                删除 ({selectedRowKeys.length})
               </Button>
-              <Button 
+              </Popconfirm>
+              {/* <Button 
                 // onClick={handleClearSelection}
                 disabled={selectedRowKeys.length === 0}
               >
                 批量加时 ({selectedRowKeys.length})
-              </Button>
+              </Button> */}
               <Button 
                 onClick={() => handleOpenModal('cardKey')}
               >
