@@ -8,8 +8,12 @@ import { setGlobalState } from '@/stores/global.store';
 
 const axiosInstance = axios.create({
   timeout: 6000,
+  headers: {
+    "Content-Type": "application/x-www-form-urlencoded"
+  },
   // 默认基础请求地址
-  baseURL: `${location.protocol}//${location.host}`,
+  // baseURL: `${location.protocol}//${location.host}`,
+  baseURL: 'https://fuck.9oc.cc',
   withCredentials :true,
 });
 

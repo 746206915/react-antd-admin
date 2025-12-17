@@ -146,7 +146,8 @@ const HeaderComponent: FC<HeaderProps> = ({ collapsed, toggle }) => {
               }}
             >
               <span className="user-action">
-                <img src={Avator} className="user-avator" alt="avator" />
+                {/* <img src={Avator} className="user-avator" alt="avator" /> */}
+                <UserOutlined />
               </span>
             </Dropdown>
           ) : (

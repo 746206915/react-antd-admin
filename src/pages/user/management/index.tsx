@@ -245,28 +245,28 @@ const AppUserManagementPage: FC = () => {
 
   // 处理设置保存（提交修改后的字段）
   const handleSaveSettings = async (values: Partial<AppUserInfo>) => {
-    if (!userId) return;
-    try {
-      setLoading(true);
-      // 调用后端更新接口，仅提交修改的字段
-      console.error(values);
-      const updateData: SetAppInfoParams = {
-        ID: Number(userId),
-        Description: values.Description!, // 非空断言（表单验证已确保有值）
-        Notice: values.Notice!,
-        Status: values.Status!,
-      };
-      console.error(updateData);
-      await setAppInfo(updateData);
-      message.success('保存成功！');
-      // 更新本地数据（保持页面状态同步）
-      setAppData(prev => prev ? { ...prev, ...values } : null);
-    } catch (error) {
-      message.error('保存失败：' + (error as Error).message);
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
+    // if (!userId) return;
+    // try {
+    //   setLoading(true);
+    //   // 调用后端更新接口，仅提交修改的字段
+    //   console.error(values);
+    //   const updateData: SetAppInfoParams = {
+    //     ID: Number(userId),
+    //     Description: values.Description!, // 非空断言（表单验证已确保有值）
+    //     Notice: values.Notice!,
+    //     Status: values.Status!,
+    //   };
+    //   console.error(updateData);
+    //   await setAppInfo(updateData);
+    //   message.success('保存成功！');
+    //   // 更新本地数据（保持页面状态同步）
+    //   setAppData(prev => prev ? { ...prev, ...values } : null);
+    // } catch (error) {
+    //   message.error('保存失败：' + (error as Error).message);
+    //   console.error(error);
+    // } finally {
+    //   setLoading(false);
+    // }
   };
 
   // 加载中/无数据处理

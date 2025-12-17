@@ -11,17 +11,17 @@ export default defineConfig({
       '@': path.join(__dirname, 'src'),
     },
   },
-  server: {
-    port: 8889,
-    proxy: {
-      '/api': {
-        // target: `http://localhost:${process.env.PORT}/api`,
-        target: `http://localhost:80/api`,
-        // changeOrigin: true,
-        rewrite: path => path.replace(/^\/api/, ''),
-      },
-    },
-  },
+  // server: {
+  //   port: 8889,
+  //   proxy: {
+  //     '/api': {
+  //       // target: `http://localhost:${process.env.PORT}/api`,
+  //       target: `http://localhost:80/api`,
+  //       // changeOrigin: true,
+  //       rewrite: path => path.replace(/^\/api/, ''),
+  //     },
+  //   },
+  // },
   plugins: [
     react({
       jsxImportSource: '@emotion/react',
