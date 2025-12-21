@@ -2,10 +2,13 @@ import type { FC, ChangeEvent } from 'react';
 import { useState, useEffect, useMemo } from 'react';
 import { 
   Table, Input, Space, Button, Tag, Popconfirm,
-  Card, Form, Row, Col, Pagination, message
+  Card, Form, Row, Col, Pagination, message, Modal, Typography
 } from 'antd';
+import { CopyOutlined, MenuFoldOutlined, MenuUnfoldOutlined, UserOutlined } from '@ant-design/icons';
+
 import { useParams, useNavigate } from 'react-router-dom';
 import type { TableRowSelection } from 'antd/es/table/interface';
+
 
 import MyButton from '@/components/basic/button';
 import type { AppUserList } from '@/interface/appuser.interface';
@@ -60,6 +63,9 @@ const UserListPage: FC = () => {
   // 选中行管理（Table 原生选择功能）
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
+  // 新增：卡密添加结果弹窗相关状态
+  const [resultModalVisible, setResultModalVisible] = useState(false);
+  const [generatedCardKeys, setGeneratedCardKeys] = useState<string[]>([]);
   // 核心：首次拉取全部数据
   const fetchAllData = async () => {
     if (!appId) return;
@@ -204,6 +210,16 @@ const handleBatchDelete = async () => {
     const handleCloseModal = () => {
       setModalVisible(false);
     };
+
+    // 新增：复制全部卡密
+  const handleCopyAllCardKeys = () => {
+    const allKeysText = generatedCardKeys.join('\n');
+    navigator.clipboard.writeText(allKeysText).then(() => {
+      message.success('已复制所有卡密到剪贴板');
+    }).catch(() => {
+      message.error('复制失败，请手动复制');
+    });
+  };
   
     // 提交新增用户表单
     const handleSubmitAddAppUser = async (values: { 
@@ -221,11 +237,16 @@ const handleBatchDelete = async () => {
         return;
       }
       try {
+        // 新增：清空之前生成的卡密列表
+    setGeneratedCardKeys([]);
         setIsAdding(true);
         if (modalType === 'cardKey') {
           // 卡密专属逻辑
+          // 卡密专属逻辑 - 收集生成的卡密
+        const newCardKeys: string[] = [];
           for (let i = 0; i < values.count; i++) {
             const cardkey = generateRandomString(values.len);
+            newCardKeys.push(cardkey); // 收集卡密
             await AddAppUser({
               appid: Number(appId),
               userkey: cardkey,
@@ -233,6 +254,10 @@ const handleBatchDelete = async () => {
               time_interval: time_interval,
             });
           }
+          // 保存生成的卡密列表
+        setGeneratedCardKeys(newCardKeys);
+        // 打开结果弹窗
+        setResultModalVisible(true);
         } else {
           // 序列号专属逻辑
           await AddAppUser({
@@ -431,6 +456,44 @@ const handleBatchDelete = async () => {
         onSubmit={handleSubmitAddAppUser}
         loading={isAdding}
       />
+
+      {/* 新增：卡密添加结果弹窗 */}
+      <Modal
+        title="新增卡密列表"
+        open={resultModalVisible}
+        onCancel={() => setResultModalVisible(false)}
+        footer={[
+          <Button key="copyAll" type="primary" onClick={handleCopyAllCardKeys}>
+            <CopyOutlined /> 复制全部卡密
+          </Button>,
+          <Button key="close" onClick={() => setResultModalVisible(false)}>
+            关闭
+          </Button>
+        ]}
+        width={600}
+        destroyOnClose={true}
+      >
+        <Typography.Paragraph style={{ marginBottom: 16 }}>
+          本次共生成 <strong>{generatedCardKeys.length}</strong> 个卡密：
+        </Typography.Paragraph>
+        {generatedCardKeys.map((key, index) => (
+            <div key={index} style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              marginBottom: 8,
+              padding: 8,
+            }}>
+              <span style={{ flex: 1, wordBreak: 'break-all' }}>
+                {index + 1}. {key}
+              </span>
+            </div>
+          ))}
+          {generatedCardKeys.length === 0 && (
+            <div style={{ textAlign: 'center'}}>
+              暂无卡密数据
+            </div>
+          )}
+      </Modal>
     </div>
   );
 };
