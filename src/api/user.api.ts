@@ -26,3 +26,6 @@ import type { AppUserInfo } from '@/interface/appuser.interface';
 export const GetAppUserInfo = (data: { userid: number}) => {
   return request<AppUserInfo>('post', '/api/user/getinfo', data);
 };
+export const SetAppUserInfo = (data: { id: number, status: string, description: string, end_time: number }) => {
+  return request('post', '/api/user/setinfo', data);
+};

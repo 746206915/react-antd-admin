@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
+import moment from 'moment';
 import type { FC } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, Tabs, Form, message, Input, Space, Button, Select, Popconfirm, Upload } from 'antd'; // 从antd导入Breadcrumb
+import { Card, Tabs, Form, message, Input, Space, Button, Select, Popconfirm, Upload, DatePicker } from 'antd'; // 从antd导入Breadcrumb
 import { SaveOutlined, ArrowLeftOutlined, UploadOutlined, ReloadOutlined, EditOutlined } from '@ant-design/icons';
 import { AppUserInfo } from '@/interface/appuser.interface';
 
-import { GetAppUserInfo } from '@/api/user.api'; // 导入API
+import { GetAppUserInfo, SetAppUserInfo } from '@/api/user.api'; // 导入API
 
 const userStatusOptions = [
   { label: '未激活', value: 'InActive' },
@@ -44,7 +45,7 @@ const UserInfo: FC<{
   data: AppUserInfo;
   onSave: (values: Partial<AppUserInfo>) => Promise<void>;
 }> = ({ data, onSave }) => {
-  const { userid } = useParams();
+  const { userId } = useParams();
   const navigate = useNavigate()
   const [form] = Form.useForm();
 
@@ -60,7 +61,9 @@ const UserInfo: FC<{
       CreatTime: new Date(data.CreatTime * 1000).toLocaleString('zh-CN'),
       TimeInterval: formatTimeDuration(data.TimeInterval),
       ActiveTime: data.ActiveTime  === 0 ? '无' : new Date(data.ActiveTime * 1000).toLocaleString('zh-CN'),
-      EndTime: data.EndTime  === 0 ? '无' : new Date(data.EndTime * 1000).toLocaleString('zh-CN'),
+      EndTime: data.EndTime === 0 
+      ? null // 无到期时间 → 赋值 null，对应 DatePicker 清空状态
+      : moment(data.EndTime * 1000), // 有效时间戳 → 转为 moment 实例，适配 DatePicker 展示
       LoginTime: data.LoginTime === 0 ? '无' : new Date(data.LoginTime * 1000).toLocaleString('zh-CN'),
       LoginIp: data.LoginIp,
     });
@@ -73,149 +76,128 @@ const UserInfo: FC<{
       const values = await form.validateFields();
       // 调用父组件的保存方法
       
-      await onSave(values);
+      // await onSave(values); ????????????????????????????????????????????????????????????????????????????????????????????
+      //需要修改 状态 描述 到期时间
+      // 【核心修改】处理 EndTime：moment 实例 → 秒级时间戳
+    let endTimeParam = 0; // 默认为 0，对应「无到期时间」（和原有业务逻辑一致）
+    if (values.EndTime) {
+      // 1. moment.valueOf() 返回毫秒级时间戳
+      // 2. 除以 1000 并向下取整，转为秒级时间戳，和其他时间字段（CreatTime/ActiveTime）保持一致
+      endTimeParam = Math.floor(values.EndTime.valueOf() / 1000);
+    }
+
+      await SetAppUserInfo({id: Number(userId), status: values.Status, description: values.Description, end_time: endTimeParam});
     } catch (error) {
       message.error('表单验证失败，请检查必填项');
       console.error(error);
     }
   };
 
-  return (
-    <div >
-      <Form
-        form={form}
-        layout="vertical"
-        // initialValues={{ name: '', description: '' }}
-      >
-        <Form.Item
-          name="CreatorID"
-          label="制卡/授权人ID"
-        >
-          <Input
-            readOnly
-          />
-        </Form.Item>
-        <Form.Item
-          name="Usertype"
-          label="用户种类"
-        >
-          <Input
-            readOnly
-          />
-        </Form.Item>
-        <Form.Item
-          name="Cardkey"
-          label="卡密"
-        >
-          <Input
-            readOnly
-          />
-        </Form.Item>
-        <Form.Item
-          name="Serial"
-          label="序列号"
-        >
-          <Input
-            readOnly
-          />
-        </Form.Item>
-        <Form.Item
-          name="Status"
-          label="用户状态"
-          rules={[{ required: true, message: '请选择状态' }]} // 提示文案适配选择场景
-        >
-          <Select
-            placeholder="请选择用户状态" // 占位符适配选择场景
-            options={userStatusOptions}     // 配置下拉选项
-            // style={{ width: '100%' }}    // 保持和Input一致的宽度
-          />
-        </Form.Item>
+return (
+  <div>
+    {/* 第一部分：只读信息展示（移除 Form.Item，仅用纯 Input 展示，不参与表单） */}
+    <Space direction="vertical" size="large" style={{ marginBottom: 24, width: '100%' }}>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <label style={{ width: 120, fontWeight: 500 }}>制卡/授权人ID：</label>
+        <Input value={data.CreatorID} readOnly style={{ flex: 1, maxWidth: 400 }} />
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <label style={{ width: 120, fontWeight: 500 }}>用户种类：</label>
+        <Input value={data.UserType === 'CardKey' ? '卡密' : '序列号'} readOnly style={{ flex: 1, maxWidth: 400 }} />
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <label style={{ width: 120, fontWeight: 500 }}>卡密：</label>
+        <Input value={data.Cardkey} readOnly style={{ flex: 1, maxWidth: 400 }} />
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <label style={{ width: 120, fontWeight: 500 }}>序列号：</label>
+        <Input value={data.Serial} readOnly style={{ flex: 1, maxWidth: 400 }} />
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <label style={{ width: 120, fontWeight: 500 }}>创建时间：</label>
+        <Input value={new Date(data.CreatTime * 1000).toLocaleString('zh-CN')} readOnly style={{ flex: 1, maxWidth: 400 }} />
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <label style={{ width: 120, fontWeight: 500 }}>时间值：</label>
+        <Input value={formatTimeDuration(data.TimeInterval)} readOnly style={{ flex: 1, maxWidth: 400 }} />
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <label style={{ width: 120, fontWeight: 500 }}>激活时间：</label>
+        <Input value={data.ActiveTime === 0 ? '无' : new Date(data.ActiveTime * 1000).toLocaleString('zh-CN')} readOnly style={{ flex: 1, maxWidth: 400 }} />
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <label style={{ width: 120, fontWeight: 500 }}>登录时间：</label>
+        <Input value={data.LoginTime === 0 ? '无' : new Date(data.LoginTime * 1000).toLocaleString('zh-CN')} readOnly style={{ flex: 1, maxWidth: 400 }} />
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <label style={{ width: 120, fontWeight: 500 }}>登录IP：</label>
+        <Input value={data.LoginIp} readOnly style={{ flex: 1, maxWidth: 400 }} />
+      </div>
+    </Space>
 
-        <Form.Item
-          name="Description"
-          label="用户描述"
-          rules={[{ required: true, message: '请输入用户描述' }]}
-        >
-          <Input.TextArea rows={4} placeholder="请输入用户描述" />
-        </Form.Item>
+    {/* 第二部分：可编辑表单（仅保留需要修改的字段，无只读字段干扰） */}
+    <Form
+      form={form}
+      layout="vertical"
+      // 无需类型定义，仅保留核心配置
+    >
+      <Form.Item
+        name="Status"
+        label="用户状态"
+        rules={[{ required: true, message: '请选择状态' }]}
+      >
+        <Select
+          placeholder="请选择用户状态"
+          options={userStatusOptions}
+          style={{ width: '100%', maxWidth: 400 }}
+        />
+      </Form.Item>
 
       <Form.Item
-          name="CreatTime"
-          label="创建时间"
-        >
-          <Input
-            readOnly
-          />
-        </Form.Item>
+        name="Description"
+        label="用户描述"
+      >
+        <Input.TextArea rows={4} placeholder="请输入用户描述" style={{ maxWidth: 400 }} />
+      </Form.Item>
 
-        <Form.Item
-          name="TimeInterval"
-          label="时间值"
-        >
-          <Input
-            readOnly
-          />
-        </Form.Item>
+      <Form.Item
+        name="EndTime"
+        label="到期时间"
+      >
+        <DatePicker
+          showTime
+          format="YYYY-MM-DD HH:mm:ss"
+          placeholder="请选择到期时间（无则清空）"
+          style={{ width: '100%', maxWidth: 400 }}
+          allowClear
+          // 显式触发表单值更新，无需类型定义
+          onChange={(date) => {
+            // 直接同步选中值到 form 实例，无类型校验
+            form.setFieldsValue({ EndTime: date });
+          }}
+        />
+      </Form.Item>
 
-        <Form.Item
-          name="ActiveTime"
-          label="激活时间"
-        >
-          <Input
-            readOnly
-          />
-        </Form.Item>
-
-        <Form.Item
-          name="EndTime"
-          label="到期时间"
-        >
-          <Input
-            readOnly
-          />
-        </Form.Item>
-
-        <Form.Item
-          name="LoginTime"
-          label="登录时间"
-        >
-          <Input
-            readOnly
-          />
-        </Form.Item>
-
-        <Form.Item
-          name="LoginIp"
-          label="登录IP"
-        >
-          <Input
-            readOnly
-          />
-        </Form.Item>
-
-        {/* 可根据需要添加更多表单字段 */}
-
-        <Form.Item>
-          <Space>
-            <Button 
-              type="primary" 
-              icon={<SaveOutlined />} 
-              onClick={handleSubmit}
-            >
-              保存设置
-            </Button>
-            <Button 
-              icon={<ArrowLeftOutlined />} 
-              onClick={() => navigate('/apps')}
-            >
-              返回列表
-            </Button>
-            
-          </Space>
-        </Form.Item>
-      </Form>
-    </div>
-  );
+      <Form.Item>
+        <Space>
+          <Button 
+            type="primary" 
+            icon={<SaveOutlined />} 
+            onClick={handleSubmit}
+          >
+            保存设置
+          </Button>
+          <Button 
+            icon={<ArrowLeftOutlined />} 
+            onClick={() => navigate('/apps')}
+          >
+            返回列表
+          </Button>
+        </Space>
+      </Form.Item>
+    </Form>
+  </div>
+);
 };
 
 const AppUserManagementPage: FC = () => {

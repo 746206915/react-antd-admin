@@ -332,7 +332,7 @@ const handleBatchDelete = async () => {
       dataIndex: 'Endtime', 
       key: 'Endtime',
       render: (timestamp: number) => timestamp 
-        ? new Date(timestamp).toLocaleString('zh-CN') 
+        ? new Date(timestamp*1000).toLocaleString('zh-CN') 
         : '无'
     },
     {
@@ -484,7 +484,8 @@ const handleBatchDelete = async () => {
               padding: 8,
             }}>
               <span style={{ flex: 1, wordBreak: 'break-all' }}>
-                {index + 1}. {key}
+                {/* {index + 1}. {key} */}
+                {key}
               </span>
             </div>
           ))}
